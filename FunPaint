@@ -1,0 +1,690 @@
+;; HW 9: Shourya
+
+;; Project: FunPaint
+
+(require 2htdp/image)
+(require 2htdp/universe)
+
+
+(define-struct circ [radius mode color])
+;; A Circ is a (make-circ Number String String)
+;; Interpretation: a (make-circ radius mode color) where
+;; radius is the radius of the circle
+;; mode is if the circle is outlined or solid
+;; color is the color of the circle
+
+;; Example
+
+(define CIRC-1 (make-circ 20 "solid" "green"))
+(define CIRC-2 (make-circ 30 "solid" "blue"))
+(define CIRC-3 (make-circ 40 "solid" "yellow"))
+
+;; circ-temp -> ?
+#;
+
+(define (circ-temp c)
+  (... (circ-radius c) ...
+       (circ-mode c) ...
+       (circ-color c) ...))
+
+
+(define-struct rect [width length mode color])
+;; A Rect is a (make-rect Number Number String String)
+;; Interpretation: a (make-rect width length mode color) where
+;; width is the width of the rectangle
+;; length is the length of the rectangle
+;; mode is if the rectangle is outlined or solid
+;; color is the color of the rectangle
+
+;; Example
+
+(define RECT-1 (make-rect 20 25 "solid" "green"))
+(define RECT-2 (make-rect 10 20 "solid" "blue"))
+(define RECT-3 (make-rect 15 5 "solid" "yellow"))
+
+;; rect-temp -> ?
+#;
+
+(define (rect-temp r)
+  (... (rect-width r) ...
+       (rect-length r) ...
+       (circ-mode r) ...
+       (circ-color r) ...))
+
+
+(define-struct tri [size mode color])
+;; A Tri is a (make-tri Number String String)
+;; Interpretation: a (make-tri size mode color) where
+;; size is the height of the triangle
+;; mode is if the triangle is outlined or solid
+;; color is the color of the triangle
+
+;; Example
+
+(define TRI-1 (make-tri 20 "solid" "green"))
+(define TRI-2 (make-tri 30 "solid" "blue"))
+(define TRI-3 (make-tri 40 "solid" "yellow"))
+
+;; tri-temp -> ?
+#;
+
+(define (tri-temp t)
+  (... (tri-size t) ...
+       (tri-mode t) ...
+       (tri-color t) ...))
+
+
+(define-struct stars [size mode color])
+;; A Stars is a (make-stars Number String String)
+;; Interpretation: a (make-stars size mode color) where
+;; size is the height of the star
+;; mode is if the star is outlined or solid
+;; color is the color of the star
+
+;; Example
+
+(define STARS-1 (make-stars 20 "solid" "green"))
+(define STARS-2 (make-stars 30 "solid" "blue"))
+(define STARS-3 (make-stars 40 "solid" "yellow"))
+
+;; stars-temp -> ?
+#;
+
+(define (stars-temp s)
+  (... (stars-size s) ...
+       (stars-mode s) ...
+       (stars-color s) ...))
+
+
+;; A FunPaintShape is one of
+;; - circ
+;; - rect
+;; - tri
+;; - stars
+;; Interpretation: current shape in the worldstate
+
+;; Example
+
+(define SHAPES-1 CIRC-1)
+(define SHAPES-2 RECT-2)
+(define SHAPES-3 TRI-3)
+(define SHAPES-4 STARS-3)
+
+;; FunPaintShape-temp -> ?
+#;
+
+(define (FunPaintShape-temp shapes)
+  (... (cond
+         [(circ? shapes) (... (circ-temp shapes) ...)]
+         [(rect? shapes) (... (rect-temp shapes) ...)]
+         [(tri? shapes) (... (tri-temp shapes) ...)]
+         [(stars? shapes) (... (stars-temp shapes) ...)])))
+
+
+(define BACKGROUND (empty-scene 700 700))
+
+(define-struct placed-shape [shape position background])
+
+;; A Placed-Shape is a (make-placed-shape FunPaintShape make-posn image)
+;; Interpretation: A (make-placed-shape shape position background) where
+;; shape is the shape that is being placed
+;; position is the position coordinates on the canvas
+;; background is the canvas on which the shapes are placed
+
+;; Examples
+
+(define PLACED-SHAPE-1 (make-placed-shape SHAPES-1 (make-posn 70 70) BACKGROUND))
+(define PLACED-SHAPE-2 (make-placed-shape SHAPES-2 (make-posn 100 150) BACKGROUND))
+(define PLACED-SHAPE-3 (make-placed-shape SHAPES-3 (make-posn 125 150) BACKGROUND))
+(define PLACED-SHAPE-4 (make-placed-shape SHAPES-4 (make-posn 190 100) BACKGROUND))
+
+;; placed-shape-temp -> ?
+#;
+
+(define (placed-shape-temp placeshape)
+  (... (FunPaintShape-temp (placed-shape-shape placeshape)) ...
+       (posn-x (placed-shape-position placeshape)) ...
+       (posn-y (placed-shape-position placeshape)) ...
+       (placed-shape-background placeshape) ...))
+
+
+;; FunPaint Part 2
+
+;; Task 1
+
+;; place-shape: placed-shape -> placed-shape
+;; purpose statement: prints shape onto the empty scene
+
+(define (place-s s)
+  (cond
+    [(circ? (placed-shape-shape s))
+     (make-placed-shape
+      (placed-shape-shape s)
+      (placed-shape-position s)
+      (place-image (circle (circ-radius (placed-shape-shape s)) "solid"
+                           (circ-color (placed-shape-shape s)))
+                   (posn-x (placed-shape-position s))
+                   (posn-y (placed-shape-position s))
+                   (placed-shape-background s)))]
+    [(rect? (placed-shape-shape s))
+     (make-placed-shape
+      (placed-shape-shape s)
+      (placed-shape-position s)
+      (place-image (rectangle (rect-width (placed-shape-shape s))
+                              (rect-length (placed-shape-shape s)) "solid"
+                              (rect-color (placed-shape-shape s)))
+                   (posn-x (placed-shape-position s))
+                   (posn-y (placed-shape-position s))
+                   (placed-shape-background s)))]
+    [(tri? (placed-shape-shape s))
+     (make-placed-shape
+      (placed-shape-shape s)
+      (placed-shape-position s)
+      (place-image (triangle (tri-size (placed-shape-shape s)) "solid"
+                             (tri-color (placed-shape-shape s)))
+                   (posn-x (placed-shape-position s))
+                   (posn-y (placed-shape-position s))
+                   (placed-shape-background s)))]
+    [(stars? (placed-shape-shape s))
+     (make-placed-shape
+      (placed-shape-shape s)
+      (placed-shape-position s)
+      (place-image (star (stars-size (placed-shape-shape s)) "solid"
+                         (stars-color (placed-shape-shape s)))
+                   (posn-x (placed-shape-position s))
+                   (posn-y (placed-shape-position s))
+                   (placed-shape-background s)))]))
+
+
+(check-expect (place-s PLACED-SHAPE-1)
+              (make-placed-shape (make-circ 20 "solid" "green") (make-posn 70 70)
+                                 (place-image (circle
+                                               (circ-radius (placed-shape-shape PLACED-SHAPE-1))
+                                               "solid"
+                                               (circ-color (placed-shape-shape PLACED-SHAPE-1)))
+                                              (posn-x (placed-shape-position PLACED-SHAPE-1))
+                                              (posn-y (placed-shape-position PLACED-SHAPE-1))
+                                              (placed-shape-background PLACED-SHAPE-1))))
+(check-expect (place-s PLACED-SHAPE-4)
+              (make-placed-shape (make-stars 40 "solid" "yellow") (make-posn 190 100)
+                                 (place-image (star
+                                               (stars-size (placed-shape-shape PLACED-SHAPE-4))
+                                               "solid"
+                                               (stars-color (placed-shape-shape PLACED-SHAPE-4)))
+                                              (posn-x (placed-shape-position PLACED-SHAPE-4))
+                                              (posn-y (placed-shape-position PLACED-SHAPE-4))
+                                              (placed-shape-background PLACED-SHAPE-4))))
+(check-expect (place-s PLACED-SHAPE-3)
+              (make-placed-shape (make-tri 40 "solid" "yellow") (make-posn 125 150)
+                                 (place-image (triangle
+                                               (tri-size (placed-shape-shape PLACED-SHAPE-3))
+                                               "solid"
+                                               (tri-color (placed-shape-shape PLACED-SHAPE-3)))
+                                              (posn-x (placed-shape-position PLACED-SHAPE-3))
+                                              (posn-y (placed-shape-position PLACED-SHAPE-3))
+                                              (placed-shape-background PLACED-SHAPE-3))))
+
+;; Task 2
+
+;; A Type is one of
+;; - Shape
+;; - Size "+" or "-"
+;; - Color "red" "orange" "yellow" "green" "blue" and "violet"
+
+;; Interpretation: a Type is a shape or string that returns what the button's action is
+
+;; Examples
+
+(define TYPE-GREEN "green")
+(define TYPE-SIZE "-")
+(define TYPE-CIRC (make-circ 10 "solid" "black"))
+
+
+
+(define-struct toolbar [type pos shape])
+
+;; A toolbar is a (make-toolbar Function Posn Shape)
+#|
+Interpretation: a (make-toolbar type pos shape) where:
+- type is what type of button is on the toolbar
+- pos is where the button is on the toolbar
+- shape is the shape of the button on the toolbar
+|#
+
+;; Examples
+
+(define TB-CIRC (make-toolbar (make-circ 10 "black" "solid") (make-posn 10 10)
+                              (circle 10 "solid" "black")))
+(define TB-RECT (make-toolbar (make-rect 5 10 "black" "solid") (make-posn 50 15)
+                              (rectangle 20 10 "solid" "black")))
+(define TB-TRI (make-toolbar (make-tri 10 "black" "solid") (make-posn 30 10)
+                             (triangle 20 "solid" "black")))
+(define TB-STARS (make-toolbar (make-stars 10 "black" "solid") (make-posn 70 10)
+                               (star 12 "solid" "black")))
+
+(define PLUS (make-toolbar "+" (make-posn 210 10) (underlay (rectangle 20 5 "solid" "black")
+                                                            (rectangle 5 20 "solid" "black"))))
+(define MINUS (make-toolbar "-" (make-posn 230 15) (rectangle 20 10 "solid" "black")))
+
+(define TB-RED (make-toolbar "red" (make-posn 90 10) (square 20 "solid" "red")))
+(define TB-ORANGE (make-toolbar "orange" (make-posn 110 10) (square 20 "solid" "orange")))
+(define TB-YELLOW (make-toolbar "yellow" (make-posn 130 10) (square 20 "solid" "yellow")))
+(define TB-GREEN (make-toolbar "green" (make-posn 150 10) (square 20 "solid" "green")))
+(define TB-BLUE (make-toolbar "blue" (make-posn 170 10) (square 20 "solid" "blue")))
+(define TB-VIOLET (make-toolbar "violet" (make-posn 190 10) (square 20 "solid" "violet")))
+
+
+
+;; Template: toolbar-templ : Toolbar -> ?
+#;
+(define (toolbar-templ t)
+  (... (f-templ (toolbar-type t)) ...)
+  (... (toolbar-pos t) ...)
+  (... (toolbar-templ (toolbar-shape t)) ...))
+
+
+;; Task 3
+
+;; shapes-property: placed-shape -> Number
+;; purpose statement: returns size of shape
+
+(define (shapes-property s)
+  (cond
+    [(circ? (placed-shape-shape s))
+     (* 2 (circ-radius (placed-shape-shape s)))]
+    [(rect? (placed-shape-shape s))
+     (rect-width (placed-shape-shape s))]
+    [(tri? (placed-shape-shape s))
+     (tri-size (placed-shape-shape s))]
+    [(stars? (placed-shape-shape s))
+     (stars-size (placed-shape-shape s))]))
+
+(check-expect (shapes-property PLACED-SHAPE-1) 40)
+(check-expect (shapes-property PLACED-SHAPE-2) 10)
+(check-expect (shapes-property PLACED-SHAPE-3) 40)
+
+
+
+;; shape-make: placed-image -> placed-image
+;; purpose statement: creates the shape
+
+
+(define (shape-make s)
+  (cond
+    [(circ? (placed-shape-shape s))
+     (circle 15 "solid" (circ-color (placed-shape-shape s)))]
+    [(rect? (placed-shape-shape s))
+     (rectangle 30 20 "solid" (rect-color (placed-shape-shape s)))]
+    [(tri? (placed-shape-shape s))
+     (triangle 30 "solid" (tri-color (placed-shape-shape s)))]
+    [(stars? (placed-shape-shape s))
+     (star 30 "solid" (stars-color (placed-shape-shape s)))]))
+
+
+;; draw-world: place-shape -> Image
+;; purpose statement: creates world scene
+
+(define (draw-world s)
+  (let ((shapes-property (shapes-property s)))
+    (underlay/xy
+     (underlay/xy
+      (underlay/xy
+       (underlay/xy
+        (underlay/xy
+         (underlay/xy
+          (underlay/xy
+           (underlay/xy
+            (underlay/xy
+             (underlay/xy
+              (underlay/xy
+               (underlay/xy
+                (underlay/xy
+                 (underlay/xy (placed-shape-background s)
+                              (posn-x (toolbar-pos TB-CIRC)) (posn-y (toolbar-pos TB-CIRC))
+                              (toolbar-shape TB-CIRC))
+                 (posn-x (toolbar-pos TB-RECT)) (posn-y (toolbar-pos TB-RECT))
+                 (toolbar-shape TB-RECT))
+                (posn-x (toolbar-pos TB-TRI)) (posn-y (toolbar-pos TB-TRI))
+                (toolbar-shape TB-TRI))
+               (posn-x (toolbar-pos TB-STARS)) (posn-y (toolbar-pos TB-STARS))
+               (toolbar-shape TB-STARS))
+              (posn-x (toolbar-pos TB-RED)) (posn-y (toolbar-pos TB-RED))
+              (toolbar-shape TB-RED))
+             (posn-x (toolbar-pos TB-ORANGE)) (posn-y (toolbar-pos TB-ORANGE))
+             (toolbar-shape TB-ORANGE))
+            (posn-x (toolbar-pos TB-YELLOW)) (posn-y (toolbar-pos TB-YELLOW))
+            (toolbar-shape TB-YELLOW))
+           (posn-x (toolbar-pos TB-GREEN)) (posn-y (toolbar-pos TB-GREEN))
+           (toolbar-shape TB-GREEN))
+          (posn-x (toolbar-pos TB-BLUE)) (posn-y (toolbar-pos TB-BLUE))
+          (toolbar-shape TB-BLUE))
+         (posn-x (toolbar-pos TB-VIOLET)) (posn-y (toolbar-pos TB-VIOLET))
+         (toolbar-shape TB-VIOLET))
+        (posn-x (toolbar-pos PLUS)) (posn-y (toolbar-pos PLUS))
+        (toolbar-shape PLUS))
+       (posn-x (toolbar-pos MINUS)) (posn-y (toolbar-pos MINUS))
+       (toolbar-shape MINUS))
+      10 40 (shape-make s))
+     10 80 (text (number->string shapes-property) 20 "black"))))
+
+
+;; Task 4
+
+;; new-shape-posn : placed-shaped Number Number -> placed-shape
+;; purpose statement: makes a shape at the specified mouse position
+
+(define (new-shape-posn s x y)
+  (make-placed-shape (placed-shape-shape s) (make-posn x y) (placed-shape-background s)))
+
+(check-expect (new-shape-posn PLACED-SHAPE-1 30 30)
+              (make-placed-shape (make-circ 20 "solid" "green") (make-posn 30 30) BACKGROUND))
+(check-expect (new-shape-posn PLACED-SHAPE-3 50 50)
+              (make-placed-shape (make-tri 40 "solid" "yellow") (make-posn 50 50) BACKGROUND))
+(check-expect (new-shape-posn PLACED-SHAPE-4 70 70)
+              (make-placed-shape (make-stars 40 "solid" "yellow") (make-posn 70 70) BACKGROUND))
+
+;; change-circ: placed-shape -> placed-shape
+;; purpose statement: makes the shape into a circle
+
+(define (change-circ s)
+  (cond
+    [(circ? (placed-shape-shape s))
+     (make-circ (circ-radius (placed-shape-shape s)) (circ-color (placed-shape-shape s))
+                (placed-shape-shape s))]
+    [(rect? (placed-shape-shape s))
+     (make-circ (/ (rect-width (placed-shape-shape s)) 3) (rect-color (placed-shape-shape s))
+                (placed-shape-shape s))]
+    [(tri? (placed-shape-shape s))
+     (make-circ (/ (tri-size (placed-shape-shape s)) 3) (tri-color (placed-shape-shape s))
+                (placed-shape-shape s))]
+    [(stars? (placed-shape-shape s))
+     (make-circ (/ (stars-size (placed-shape-shape s)) 3) (stars-color (placed-shape-shape s))
+                (placed-shape-shape s))]))
+
+(check-expect (change-circ PLACED-SHAPE-2) (make-circ 3.3 "blue" (make-rect 10 20 "solid" "blue")))
+(check-expect (change-circ PLACED-SHAPE-3) (make-circ 13.3 "yellow" (make-tri 40 "solid" "yellow")))
+(check-expect (change-circ PLACED-SHAPE-4) (make-circ 13.3 "yellow" (make-stars 40 "solid" "yellow")))
+
+;; change-rect: placed-shape -> placed-shape
+;; purpose statement: makes the shape into a rectangle
+
+(define (change-rect s)
+  (cond
+    [(circ? (placed-shape-shape s))
+     (make-rect (- (* 2 (circ-radius (placed-shape-shape s))) 5)
+                (* 2 (circ-radius (placed-shape-shape s)))
+                (circ-color (placed-shape-shape s))
+                (placed-shape-shape s))]
+    [(rect? (placed-shape-shape s))
+     (make-rect (rect-length (placed-shape-shape s)) (rect-width (placed-shape-shape s))
+                (rect-color (placed-shape-shape s))
+                (placed-shape-shape s))]
+    [(tri? (placed-shape-shape s))
+     (make-rect (- (tri-size (placed-shape-shape s)) 5) (tri-size (placed-shape-shape s))
+                (tri-color (placed-shape-shape s))
+                (placed-shape-shape s))]
+    [(stars? (placed-shape-shape s))
+     (make-rect (- (stars-size (placed-shape-shape s)) 5) (stars-size (placed-shape-shape s))
+                (stars-color (placed-shape-shape s))
+                (placed-shape-shape s))]))
+
+(check-expect (change-rect PLACED-SHAPE-1) (make-rect 35 40 "green" (make-circ 20 "solid" "green")))
+(check-expect (change-rect PLACED-SHAPE-3) (make-rect 35 40 "yellow" (make-tri 40 "solid" "yellow")))
+(check-expect (change-rect PLACED-SHAPE-4) (make-rect 35 40 "yellow"
+                                                      (make-stars 40 "solid" "yellow")))
+
+
+;; change-tri : placed-shape -> placed-shape
+;; purpose statement: makes the shape into a triangle
+
+(define (change-tri s)
+  (cond
+    [(circ? (placed-shape-shape s))
+     (make-tri (* (circ-radius (placed-shape-shape s)) 3) (circ-color (placed-shape-shape s))
+               (placed-shape-shape s))]
+    [(rect? (placed-shape-shape s))
+     (make-tri (rect-width (placed-shape-shape s)) (rect-color (placed-shape-shape s))
+               (placed-shape-shape s))]
+    [(tri? (placed-shape-shape s))
+     (make-tri (tri-size (placed-shape-shape s)) (tri-color (placed-shape-shape s))
+               (placed-shape-shape s))]
+    [(stars? (placed-shape-shape s))
+     (make-tri (stars-size (placed-shape-shape s)) (stars-color (placed-shape-shape s))
+               (placed-shape-shape s))]))
+
+(check-expect (change-tri PLACED-SHAPE-1) (make-tri 60 "green" (make-circ 20 "solid" "green")))
+(check-expect (change-tri PLACED-SHAPE-2) (make-tri 10 "blue" (make-rect 10 20 "solid" "blue")))
+(check-expect (change-tri PLACED-SHAPE-4) (make-tri 40 "yellow" (make-stars 40 "solid" "yellow")))
+
+
+;; change-stars: placed-shape -> placed-shape
+;; purpose statement: changers the shape from whatever it is to a star
+
+(define (change-stars s)
+  (cond
+    [(circ? (placed-shape-shape s))
+     (make-stars (* 2 (circ-radius (placed-shape-shape s)))
+                 (circ-color (placed-shape-shape s))
+                 (placed-shape-shape s))]
+    [(rect? (placed-shape-shape s))
+     (make-stars (rect-width (placed-shape-shape s)) (rect-color (placed-shape-shape s))
+                 (placed-shape-shape s))]
+    [(tri? (placed-shape-shape s))
+     (make-stars (tri-size (placed-shape-shape s)) (tri-color (placed-shape-shape s))
+                 (placed-shape-shape s))]
+    [(stars? (placed-shape-shape s))
+     (make-stars (stars-size (placed-shape-shape s)) (stars-color (placed-shape-shape s))
+                 (placed-shape-shape s))]))
+
+(check-expect (change-stars PLACED-SHAPE-1) (make-stars 40 "green" (make-circ 20 "solid" "green")))
+(check-expect (change-stars PLACED-SHAPE-2) (make-stars 10 "blue" (make-rect 10 20 "solid" "blue")))
+(check-expect (change-stars PLACED-SHAPE-3) (make-stars 40 "yellow" (make-tri 40 "solid" "yellow")))
+
+;; change-shape: placed-shape String -> placed-shape
+;; purpose statement: changes shape to inputted shape
+
+(define (change-shape s newshape)
+  (cond
+    [(string=? "circle" newshape)
+     (make-placed-shape (change-circ s) (placed-shape-position s) (placed-shape-background s))]
+    [(string=? "rectangle" newshape)
+     (make-placed-shape (change-rect s) (placed-shape-position s) (placed-shape-background s))]
+    [(string=? "triangle" newshape)
+     (make-placed-shape (change-tri s) (placed-shape-position s) (placed-shape-background s))]
+    [(string=? "star" newshape)
+     (make-placed-shape (change-stars s) (placed-shape-position s) (placed-shape-background s))]))
+
+
+(check-expect (change-shape PLACED-SHAPE-1 "rectangle") (make-placed-shape
+                                                         (make-rect 35 40 "green"
+                                                                    (make-circ 20 "solid" "green"))
+                                                         (make-posn 70 70) BACKGROUND))
+(check-expect (change-shape PLACED-SHAPE-2 "triangle") (make-placed-shape
+                                                        (make-tri 10 "blue"
+                                                                  (make-rect 10 20 "solid" "blue"))
+                                                        (make-posn 100 150) BACKGROUND))
+(check-expect (change-shape PLACED-SHAPE-3 "circle") (make-placed-shape
+                                                      (make-circ 13.3 "yellow"
+                                                                 (make-tri 40 "solid" "yellow"))
+                                                      (make-posn 125 150) BACKGROUND)) 
+
+
+;; size-add : placed-shape -> placed-shape
+;; purpose statement: increases the size of the shape
+
+(define (size-add s)
+  (cond
+    [(circ? (placed-shape-shape s))
+     (make-circ (+ 3 (circ-radius (placed-shape-shape s))) (circ-color
+                                                            (placed-shape-shape s))
+                (placed-shape-shape s))]
+    [(rect? (placed-shape-shape s))
+     (make-rect (+ 5 (rect-length (placed-shape-shape s))) (+ 5 (rect-width
+                                                                 (placed-shape-shape s)))
+                (rect-color (placed-shape-shape s)) (placed-shape-shape s))]
+    [(tri? (placed-shape-shape s))
+     (make-tri (+ 3 (tri-size (placed-shape-shape s))) (tri-color (placed-shape-shape s))
+               (placed-shape-shape s))]
+    [(stars? (placed-shape-shape s))
+     (make-stars (+ 3 (stars-size (placed-shape-shape s))) (stars-color (placed-shape-shape s))
+                 (placed-shape-shape s))]))
+
+(check-expect (size-add PLACED-SHAPE-1) (make-circ 23 "green" (make-circ 20 "solid" "green")))
+(check-expect (size-add PLACED-SHAPE-2) (make-rect 25 15 "blue" (make-rect 10 20 "solid" "blue")))
+(check-expect (size-add PLACED-SHAPE-3) (make-tri 43 "yellow" (make-tri 40 "solid" "yellow")))
+
+
+;; size-reduce : placed-shape -> placed-shape
+;; purpose statement: decreases the size of the shape
+
+(define (size-reduce s)
+  (cond
+    [(circ? (placed-shape-shape s))
+     (make-circ (- (circ-radius (placed-shape-shape s)) 3) (circ-color
+                                                            (placed-shape-shape s))
+                (placed-shape-shape s))]
+    [(rect? (placed-shape-shape s))
+     (make-rect (- (rect-length (placed-shape-shape s)) 5) (- (rect-width
+                                                               (placed-shape-shape s)) 5)
+                (rect-color (placed-shape-shape s)) (placed-shape-shape s))]
+    [(tri? (placed-shape-shape s))
+     (make-tri (- (tri-size (placed-shape-shape s)) 3) (tri-color (placed-shape-shape s))
+               (placed-shape-shape s))]
+    [(stars? (placed-shape-shape s))
+     (make-stars (- (stars-size (placed-shape-shape s)) 3) (stars-color (placed-shape-shape s))
+                 (placed-shape-shape s))]))
+
+(check-expect (size-reduce PLACED-SHAPE-1) (make-circ 17 "green" (make-circ 20 "solid" "green")))
+(check-expect (size-reduce PLACED-SHAPE-2) (make-rect 15 5 "blue" (make-rect 10 20 "solid" "blue")))
+(check-expect (size-reduce PLACED-SHAPE-3) (make-tri 37 "yellow" (make-tri 40 "solid" "yellow")))
+
+;; change-size : placed-shape String -> placed-shape
+;; purpose statement: does the action of changing size of the shape
+
+(define (change-size s size)
+  (cond
+    [(string=? "+" size) (make-placed-shape (size-add s) (placed-shape-position s)
+                                            (placed-shape-background s))]
+    [(string=? "-" size) (make-placed-shape (size-reduce s) (placed-shape-position s)
+                                            (placed-shape-background s))]))
+
+(check-expect (change-size PLACED-SHAPE-1 "+") (make-placed-shape (make-circ 23 "green"
+                                                                             (make-circ
+                                                                              20 "solid" "green"))
+                                                                  (make-posn 70 70) BACKGROUND))
+(check-expect (change-size PLACED-SHAPE-2 "+") (make-placed-shape
+                                                (make-rect 25 15 "blue" (make-rect 10 20 "solid"
+                                                                                   "blue"))
+                                                (make-posn 100 150) BACKGROUND))
+
+(check-expect (change-size PLACED-SHAPE-3 "-") (make-placed-shape
+                                                (make-tri 37 "yellow" (make-tri 40 "solid" "yellow"))
+                                                (make-posn 125 150) BACKGROUND))
+
+
+;; change-color: placed-shape String -> placed-shape
+;; purpose statement: changes the color of the shape placed
+
+(define (change-color s color)
+  (make-placed-shape
+   (cond
+     [(circ? (placed-shape-shape s))
+      (make-circ (circ-radius (placed-shape-shape s)) color
+                 (placed-shape-shape s))]
+     [(rect? (placed-shape-shape s))
+      (make-rect (rect-length (placed-shape-shape s))
+                 (rect-width (placed-shape-shape s)) color
+                 (placed-shape-shape s))]
+     [(tri? (placed-shape-shape s))
+      (make-tri (tri-size (placed-shape-shape s)) color
+                (placed-shape-shape s))]
+     [(stars? (placed-shape-shape s))
+      (make-stars (stars-size (placed-shape-shape s)) color
+                  (placed-shape-shape s))])
+   (placed-shape-position s) (placed-shape-background s)))
+
+(check-expect (change-color PLACED-SHAPE-1 "red") (make-placed-shape (make-circ 20 "red"
+                                                                                (make-circ 20
+                                                                                           "solid"
+                                                                                           "green"))
+                                                                     (make-posn 70 70) BACKGROUND))
+(check-expect (change-color PLACED-SHAPE-2 "orange") (make-placed-shape (make-rect 20 10 "orange"
+                                                                                   (make-rect
+                                                                                    10 20 "solid"
+                                                                                    "blue"))
+                                                                        (make-posn 100 150)
+                                                                        BACKGROUND))
+(check-expect (change-color PLACED-SHAPE-3 "yellow") (make-placed-shape (make-tri 40 "yellow"
+                                                                                  (make-tri 40 "solid"
+                                                                                            "yellow"))
+                                                                        (make-posn 125 150)
+                                                                        BACKGROUND))
+
+
+                          
+;; toolbar-press: placed-shape Number -> placed-shape
+;; purpose statement: makes the toolbar
+
+(define (toolbar-press s num)
+  (cond
+    [(< num 25) (change-shape s "circle")]
+    [(< num 50) (change-shape s "rectangle")]
+    [(< num 75) (change-shape s "triangle")]
+    [(< num 95) (change-shape s "star")]
+    [(< num 120) (change-size s "+")]
+    [(< num 145) (change-size s "-")]
+    [(< num 170) (change-color s "red")]
+    [(< num 195) (change-color s "orange")]
+    [(< num 220) (change-color s "yellow")]
+    [(< num 245) (change-color s "green")]
+    [(< num 270) (change-color s "blue")]
+    [(< num 295) (change-color s "violet")]
+    [else (place-s s)]))
+
+(check-expect (toolbar-press PLACED-SHAPE-1 200)
+              (make-placed-shape (make-circ 20 "yellow" (make-circ 20 "solid" "green"))
+                                 (make-posn 70 70) BACKGROUND))
+(check-expect (toolbar-press PLACED-SHAPE-2 100)
+              (make-placed-shape (make-rect 25 15 "blue" (make-rect 10 20 "solid" "blue"))
+                                 (make-posn 100 150) BACKGROUND))
+(check-expect (toolbar-press PLACED-SHAPE-4 100) (make-placed-shape (make-stars 43 "yellow"
+                                                                                (make-stars 40
+                                                                                            "solid"
+                                                                                            "yellow"))
+                                                                    (make-posn 190 100) BACKGROUND))
+
+
+;; handle-mouse : placed-shape Number Number String -> placed-shape
+;; purpose statement: changes mouse position to the current position and places a shape when clicked
+
+(define (handle-mouse s x y mouse)
+  (cond
+    [(string=? mouse "move")
+     (new-shape-posn s x y)]
+    [(string=? mouse "button-down")
+
+     ;; TASK 5 HERE --> extension of handle-mouse
+     
+     (if (< y 20)
+         (toolbar-press s x)
+         (place-s s))]
+    [else (new-shape-posn s x y)]))
+
+
+(check-expect (handle-mouse PLACED-SHAPE-1 30 30 "move")
+              (make-placed-shape (make-circ 20 "solid" "green") (make-posn 30 30) BACKGROUND))
+(check-expect (handle-mouse PLACED-SHAPE-2 50 50 "button-down")
+              (place-s PLACED-SHAPE-2))
+(check-expect (handle-mouse PLACED-SHAPE-3 70 70 "button-down")
+              (place-s PLACED-SHAPE-3))
+                                                                    
+
+;; fun-paint : lst -> Image
+;; purpose statement: draws the scene
+
+(define fun-paint
+  (big-bang (make-placed-shape TRI-1 (make-posn 0 0) BACKGROUND)
+    [to-draw draw-world]
+    [on-mouse handle-mouse]))
+
+
