@@ -1,0 +1,5 @@
+Changes made to SoloRedGameModel:
+
+- Made all fields protected
+- moved 'CurrentCard' from being a local variable in playToCanvas to a protected field and instead
+  now update the value in playToCanvas
